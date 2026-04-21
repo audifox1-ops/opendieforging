@@ -145,4 +145,54 @@ export const specService = {
     const { error } = await supabase.from("spec_revisions").insert([revision]);
     if (error) throw error;
   },
+
+  /**
+   * 특정 시방서의 최신 작업 로그(Instruction 실적) 가져오기
+   */
+  async getWorkLog(specId: string) {
+    const { data, error } = await supabase
+      .from("work_logs")
+      .select("*")
+      .eq("spec_id", specId)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * 신규 작업 로그 생성 (작업 시작)
+   */
+  async createWorkLog(specId: string, steps: any[], operator: string) {
+    const { data, error } = await supabase
+      .from("work_logs")
+      .insert([{
+        spec_id: specId,
+        steps,
+        operator_name: operator,
+        status: "IN_PROGRESS"
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  /**
+   * 작업 로그 업데이트 (단계 완료 및 실적 입력)
+   */
+  async updateWorkLog(id: string, updates: any) {
+    const { data, error } = await supabase
+      .from("work_logs")
+      .update(updates)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
 };

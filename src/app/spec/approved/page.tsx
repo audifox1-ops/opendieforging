@@ -69,8 +69,11 @@ export default function ApprovedPage() {
                   </tr>
                 </thead>
                 <tbody>
+import { CheckCircle2, FilePlus2, FileDown, Search, ClipboardList, PenTool } from "lucide-react";
+
+// (Inside ApprovedPage component, filtered mapping area)
                   {filtered.map((spec, i) => (
-                    <tr key={spec.id || i} className="hover:bg-factory-800/10 cursor-pointer">
+                    <tr key={spec.id || i} className="hover:bg-factory-800/10 transition-colors group">
                       <td><span className="font-mono text-xs text-factory-300">{spec.doc_number}</span></td>
                       <td className="font-medium text-factory-100">{spec.product_name || "-"}</td>
                       <td className="text-factory-400">{spec.form_data.shape || "-"}</td>
@@ -81,15 +84,41 @@ export default function ApprovedPage() {
                         {spec.created_at ? new Date(spec.created_at).toLocaleDateString("ko-KR") : "-"}
                       </td>
                       <td className="text-right">
-                        <a 
-                          href={`/api/pdf/${spec.id}`} 
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-factory-300 hover:text-factory-100 transition-colors"
-                        >
-                          <FileDown className="w-3.5 h-3.5" />
-                          <span className="text-xs font-semibold">PDF</span>
-                        </a>
+                        <div className="flex items-center justify-end gap-3 opacity-80 group-hover:opacity-100">
+                          {/* 작업지시서 뷰 (현장용) */}
+                          <Link 
+                            href={`/spec/${spec.id}/instruction`}
+                            className="flex items-center gap-1 text-orange-500 hover:text-orange-400 font-bold transition-colors"
+                            title="현장 작업지시서 열기"
+                          >
+                            <ClipboardList className="w-4 h-4" />
+                            <span className="text-[10px] uppercase tracking-tighter">Work</span>
+                          </Link>
+
+                          {/* 시방서 PDF */}
+                          <a 
+                            href={`/api/pdf/${spec.id}`} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-factory-300 hover:text-factory-100 transition-colors"
+                            title="정형 시방서 출력"
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-tighter">Spec</span>
+                          </a>
+
+                          {/* 작업지시서 PDF (양식) */}
+                          <a 
+                            href={`/api/pdf/${spec.id}?type=instruction`} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-factory-400/50 hover:text-factory-200 transition-colors"
+                            title="작업지시서 양식 출력"
+                          >
+                            <FileDown className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-bold uppercase tracking-tighter">Inst</span>
+                          </a>
+                        </div>
                       </td>
                     </tr>
                   ))}
