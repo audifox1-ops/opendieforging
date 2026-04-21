@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  FilePlus2, ClipboardCheck, Clock, CheckCircle2,
   BarChart3, TrendingUp, Factory, AlertTriangle, Search, ArrowRight,
 } from "lucide-react";
 import DashboardShell from "@/components/layout/DashboardShell";
