@@ -102,40 +102,52 @@ export function validateShellLimits(
 }
 
 /**
- * 통합 CAPA 검증 함수
- * 모든 규칙을 순서대로 검증하고 결과 배열을 반환합니다.
+ * 통합 CAPA 검증 함수 (장비 안전성 중심)
+ * ─────────────────────────────────────────────
+ * 현장 요청에 따라 높이/길이의 물리적 제한은 체크하지 않으며,
+ * 크레인 및 프레스의 중량 한계(MAX_WEIGHT)만 검증합니다.
  */
 export function validateForging(input: ForgingInput): CapaValidationResult[] {
   const results: CapaValidationResult[] = [];
+  const limits = PRESS_15000T.SHELL; // 장비 한계 정보 (constants 참조)
 
-  // 규칙 1: M.P - Die 거리 한계 (외경/높이 모두 관여하지만 더 큰 쪽을 기준으로 함)
-  const distRes = validateMpDieDistance(input.od_mm, input.height_mm);
-  const distType = (input.od_mm ?? 0) > (input.height_mm ?? 0) ? "od" : "height";
-  results.push({
-    rule: "M.P - Die 거리 한계",
-    type: distType,
-    result: distRes,
-  });
+  // 규칙 1: 전체 하중 한계 (프레스/크레인 안전을 위한 150톤 제한)
+  if (input.weight_kg !== null && input.weight_kg > 0) {
+    const MAX_PRESS_WEIGHT = 150000; 
+    if (input.weight_kg > MAX_PRESS_WEIGHT) {
+      results.push({
+        rule: "프레스 하중 한계",
+        type: "weight",
+        result: {
+          passed: false,
+          errorCode: "MAX_WEIGHT_EXCEEDED",
+          message: `입력된 중량 ${input.weight_kg.toLocaleString()}kg이 장비 최대 허용 하중(150,000kg)을 초과합니다.`,
+          limit: `최대 허용: 150,000 kg`,
+        }
+      });
+    } else {
+      results.push({
+        rule: "하중 검증 완료",
+        type: "weight",
+        result: { passed: true }
+      });
+    }
+  }
 
-  // 규칙 2: SHELL 형상 한계 (SHELL일 때만)
+  // 규칙 2: SHELL 형상 전용 중량 관리
   if (input.shape === "SHELL") {
-    // SHELL은 weight, height, od 각각 검증이 필요할 수 있음
-    // 여기서는 간단하게 개별 필드별로 결과를 생성하여 UI에서 각각 표시할 수 있게 함
-    results.push({
-      rule: "SHELL 중량 한계",
-      type: "weight",
-      result: validateShellLimits(input.weight_kg, null, null, "weight"),
-    });
-    results.push({
-      rule: "SHELL 길이 한계",
-      type: "height",
-      result: validateShellLimits(null, input.height_mm, null, "height"),
-    });
-    results.push({
-      rule: "SHELL 외경 한계",
-      type: "od",
-      result: validateShellLimits(null, null, input.od_mm, "od"),
-    });
+    if (input.weight_kg !== null && input.weight_kg > limits.MAX_WEIGHT_KG) {
+      results.push({
+        rule: "SHELL 중량 한계",
+        type: "weight",
+        result: {
+          passed: false,
+          errorCode: "SHELL_WEIGHT_EXCEEDED",
+          message: `SHELL 형상 최대 중량(${limits.MAX_WEIGHT_KG.toLocaleString()}kg)을 초과합니다.`,
+          limit: `SHELL 최대: ${limits.MAX_WEIGHT_KG.toLocaleString()} kg`,
+        }
+      });
+    }
   }
 
   return results;

@@ -10,6 +10,7 @@ import {
   type ForgingShape, type NdtStandard, type HtCoolingMedia, type HtType, type MaterialStandard,
 } from "@/constants/pressLimits";
 import { validateForging, type ForgingInput, type CapaValidationResult } from "@/lib/capaValidator";
+import { calculateTargetWeight } from "@/lib/weightCalculator";
 
 export interface SpecFormData {
   productName: string;
@@ -41,7 +42,7 @@ export default function InputSmartForm({
   data, onChange, capaResults, onCapaChange,
 }: InputSmartFormProps) {
 
-  // 치수 변경 시 실시간 CAPA 검증
+  // 치수 변경 시 실시간 CAPA 검증 및 중량 자동 산출
   const runCapa = useCallback((formData: SpecFormData) => {
     const input: ForgingInput = {
       od_mm:     formData.od_mm     ? parseFloat(formData.od_mm)     : null,
@@ -49,12 +50,30 @@ export default function InputSmartForm({
       weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
       shape:     (formData.shape as ForgingShape) || null,
     };
+
+    // 중량 자동 산출 로직 (OD, Height, Shape가 모두 있을 때)
+    if (input.od_mm && input.height_mm && input.shape) {
+      const calculated = calculateTargetWeight({
+        shape: input.shape,
+        od_mm: input.od_mm,
+        height_mm: input.height_mm
+      });
+      
+      // 입력된 중량이 없거나 계산된 값과 차이가 있을 때 업데이트 (소수점 1자리 기준)
+      if (calculated !== null && (!formData.weight_kg || Math.abs(parseFloat(formData.weight_kg) - calculated) > 0.05)) {
+        onChange({ ...formData, weight_kg: calculated.toString() });
+        return;
+      }
+    }
+
     const hasDimension = input.od_mm || input.height_mm || input.weight_kg;
     if (!hasDimension) { onCapaChange([]); return; }
     onCapaChange(validateForging(input));
-  }, [onCapaChange]);
+  }, [onCapaChange, onChange]);
 
-  useEffect(() => { runCapa(data); }, [data.od_mm, data.height_mm, data.weight_kg, data.shape, runCapa]);
+  useEffect(() => { 
+    runCapa(data); 
+  }, [data.od_mm, data.height_mm, data.shape, runCapa]);
 
   function set<K extends keyof SpecFormData>(key: K, value: SpecFormData[K]) {
     onChange({ ...data, [key]: value });
@@ -226,10 +245,12 @@ export default function InputSmartForm({
                 kg
               </span>
             </div>
-            <p className="text-xs text-factory-600 mt-1">
-              {data.shape === "SHELL"
-                ? "SHELL 한계: ≤ 100,000 kg"
-                : "일반 중량 입력"}
+            <p className="text-xs text-factory-600 mt-1 flex items-center gap-1">
+              <span className="inline-block w-1 h-1 rounded-full bg-factory-500"></span>
+              {data.od_mm && data.height_mm 
+                ? "치수 기반 자동 산출됨 (Steel 7.85)" 
+                : "치수 입력 시 자동 산출됩니다."}
+              {data.shape === "SHELL" && " · SHELL 중량 한계 적용"}
             </p>
           </div>
         </div>
