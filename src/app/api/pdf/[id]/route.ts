@@ -6,10 +6,10 @@ import React from "react";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
     // 1. 시방서 데이터 조회
