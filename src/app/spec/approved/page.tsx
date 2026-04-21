@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, FilePlus2, FileDown, Search } from "lucide-react";
+import { 
+  CheckCircle2, 
+  FilePlus2, 
+  FileDown, 
+  Search, 
+  ClipboardList 
+} from "lucide-react";
 import Link from "next/link";
 import DashboardShell from "@/components/layout/DashboardShell";
 import { specService, type Specification } from "@/lib/supabase/specService";
@@ -51,7 +57,9 @@ export default function ApprovedPage() {
           </div>
         </div>
         <section className="factory-card overflow-hidden">
-          {specs.length === 0 ? (
+          {isLoading ? (
+            <div className="py-20 text-center text-factory-500">데이터 로딩 중...</div>
+          ) : specs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
               <CheckCircle2 className="w-8 h-8 text-factory-600" />
               <p className="text-factory-500 text-sm">승인 완료된 시방서가 없습니다.</p>
@@ -65,13 +73,10 @@ export default function ApprovedPage() {
                 <thead>
                   <tr>
                     <th>문서 번호</th><th>제품명</th><th>형상</th><th>소재/규격</th>
-                    <th>Rev.</th><th>작성자</th><th>승인일</th><th className="text-right">출력</th>
+                    <th>Rev.</th><th>작성자</th><th>승인일</th><th className="text-right">작업 및 출력</th>
                   </tr>
                 </thead>
                 <tbody>
-import { CheckCircle2, FilePlus2, FileDown, Search, ClipboardList, PenTool } from "lucide-react";
-
-// (Inside ApprovedPage component, filtered mapping area)
                   {filtered.map((spec, i) => (
                     <tr key={spec.id || i} className="hover:bg-factory-800/10 transition-colors group">
                       <td><span className="font-mono text-xs text-factory-300">{spec.doc_number}</span></td>
@@ -88,7 +93,7 @@ import { CheckCircle2, FilePlus2, FileDown, Search, ClipboardList, PenTool } fro
                           {/* 작업지시서 뷰 (현장용) */}
                           <Link 
                             href={`/spec/${spec.id}/instruction`}
-                            className="flex items-center gap-1 text-orange-500 hover:text-orange-400 font-bold transition-colors"
+                            className="flex items-center gap-1.5 text-orange-500 hover:text-orange-400 font-bold transition-colors"
                             title="현장 작업지시서 열기"
                           >
                             <ClipboardList className="w-4 h-4" />
@@ -100,7 +105,7 @@ import { CheckCircle2, FilePlus2, FileDown, Search, ClipboardList, PenTool } fro
                             href={`/api/pdf/${spec.id}`} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-factory-300 hover:text-factory-100 transition-colors"
+                            className="flex items-center gap-1 text-factory-300 hover:text-factory-100 transition-colors border-l border-factory-800 pl-3"
                             title="정형 시방서 출력"
                           >
                             <FileDown className="w-3.5 h-3.5" />
@@ -112,7 +117,7 @@ import { CheckCircle2, FilePlus2, FileDown, Search, ClipboardList, PenTool } fro
                             href={`/api/pdf/${spec.id}?type=instruction`} 
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-factory-400/50 hover:text-factory-200 transition-colors"
+                            className="flex items-center gap-1 text-factory-400/60 hover:text-factory-200 transition-colors"
                             title="작업지시서 양식 출력"
                           >
                             <FileDown className="w-3.5 h-3.5" />
