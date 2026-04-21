@@ -22,6 +22,7 @@ export interface ForgingInput {
 
 export interface CapaValidationResult {
   rule: string;
+  type?: string; // 검증 대상 필드 (od, height, weight 등)
   result: ValidationResult;
 }
 
@@ -60,25 +61,32 @@ export function validateMpDieDistance(
 export function validateShellLimits(
   weight_kg: number | null,
   height_mm: number | null,
-  od_mm: number | null
+  od_mm: number | null,
+  targetType?: string
 ): ValidationResult {
   const limits = PRESS_15000T.SHELL;
   const errors: string[] = [];
 
-  if (weight_kg !== null && weight_kg > 0 && weight_kg > limits.MAX_WEIGHT_KG) {
-    errors.push(
-      `중량 ${weight_kg.toLocaleString()}kg > SHELL 최대 중량 ${limits.MAX_WEIGHT_KG.toLocaleString()}kg`
-    );
+  if (targetType === "weight" || !targetType) {
+    if (weight_kg !== null && weight_kg > 0 && weight_kg > limits.MAX_WEIGHT_KG) {
+      errors.push(
+        `중량 ${weight_kg.toLocaleString()}kg > SHELL 최대 중량 ${limits.MAX_WEIGHT_KG.toLocaleString()}kg`
+      );
+    }
   }
-  if (height_mm !== null && height_mm > 0 && height_mm > limits.MAX_LENGTH_MM) {
-    errors.push(
-      `길이 ${height_mm.toLocaleString()}mm > SHELL 최대 길이 ${limits.MAX_LENGTH_MM.toLocaleString()}mm`
-    );
+  if (targetType === "height" || !targetType) {
+    if (height_mm !== null && height_mm > 0 && height_mm > limits.MAX_LENGTH_MM) {
+      errors.push(
+        `길이 ${height_mm.toLocaleString()}mm > SHELL 최대 길이 ${limits.MAX_LENGTH_MM.toLocaleString()}mm`
+      );
+    }
   }
-  if (od_mm !== null && od_mm > 0 && od_mm > limits.MAX_OD_MM) {
-    errors.push(
-      `외경 ${od_mm.toLocaleString()}mm > SHELL 최대 OD ${limits.MAX_OD_MM.toLocaleString()}mm`
-    );
+  if (targetType === "od" || !targetType) {
+    if (od_mm !== null && od_mm > 0 && od_mm > limits.MAX_OD_MM) {
+      errors.push(
+        `외경 ${od_mm.toLocaleString()}mm > SHELL 최대 OD ${limits.MAX_OD_MM.toLocaleString()}mm`
+      );
+    }
   }
 
   if (errors.length > 0) {
@@ -100,17 +108,33 @@ export function validateShellLimits(
 export function validateForging(input: ForgingInput): CapaValidationResult[] {
   const results: CapaValidationResult[] = [];
 
-  // 규칙 1: M.P - Die 거리 한계
+  // 규칙 1: M.P - Die 거리 한계 (외경/높이 모두 관여하지만 더 큰 쪽을 기준으로 함)
+  const distRes = validateMpDieDistance(input.od_mm, input.height_mm);
+  const distType = (input.od_mm ?? 0) > (input.height_mm ?? 0) ? "od" : "height";
   results.push({
     rule: "M.P - Die 거리 한계",
-    result: validateMpDieDistance(input.od_mm, input.height_mm),
+    type: distType,
+    result: distRes,
   });
 
   // 규칙 2: SHELL 형상 한계 (SHELL일 때만)
   if (input.shape === "SHELL") {
+    // SHELL은 weight, height, od 각각 검증이 필요할 수 있음
+    // 여기서는 간단하게 개별 필드별로 결과를 생성하여 UI에서 각각 표시할 수 있게 함
     results.push({
-      rule: "SHELL 형상 한계",
-      result: validateShellLimits(input.weight_kg, input.height_mm, input.od_mm),
+      rule: "SHELL 중량 한계",
+      type: "weight",
+      result: validateShellLimits(input.weight_kg, null, null, "weight"),
+    });
+    results.push({
+      rule: "SHELL 길이 한계",
+      type: "height",
+      result: validateShellLimits(null, input.height_mm, null, "height"),
+    });
+    results.push({
+      rule: "SHELL 외경 한계",
+      type: "od",
+      result: validateShellLimits(null, null, input.od_mm, "od"),
     });
   }
 
