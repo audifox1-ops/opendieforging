@@ -43,7 +43,7 @@ export function SearchableSelect({
   }, [onChange]);
 
   return (
-    <div className="relative" id={id}>
+    <div className={cn("relative", open && "z-30")} id={id}>
       <button
         type="button"
         disabled={disabled}
