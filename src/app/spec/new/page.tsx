@@ -40,6 +40,7 @@ function NewSpecContent() {
       async function loadClone() {
         setIsCloning(true);
         try {
+          if (!cloneFrom) return;
           const original = await specService.getSpecById(cloneFrom);
           if (original) {
             setFormData(original.form_data);
