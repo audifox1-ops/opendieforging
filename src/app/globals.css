@@ -1,0 +1,190 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    --background: 222 47% 5%;
+    --foreground: 210 40% 95%;
+    --card: 220 40% 8%;
+    --card-foreground: 210 40% 95%;
+    --border: 220 30% 15%;
+    --input: 220 30% 12%;
+    --primary: 217 80% 45%;
+    --primary-foreground: 210 40% 98%;
+    --muted: 220 30% 12%;
+    --muted-foreground: 215 20% 55%;
+    --accent: 217 60% 20%;
+    --accent-foreground: 210 40% 95%;
+    --destructive: 0 80% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 217 80% 45%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(30, 95, 170, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(16, 59, 114, 0.06) 0%, transparent 60%);
+  }
+}
+
+@layer components {
+  /* ── 스마트 팩토리 카드 ── */
+  .factory-card {
+    @apply bg-factory-900/60 border border-factory-700/40 rounded-xl backdrop-blur-sm;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .factory-card-hover {
+    @apply factory-card transition-all duration-200;
+  }
+  .factory-card-hover:hover {
+    @apply border-factory-500/50;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(30,95,170,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
+    transform: translateY(-1px);
+  }
+
+  /* ── 입력 필드 ── */
+  .factory-input {
+    @apply w-full bg-factory-950/80 border border-factory-700/50 rounded-lg px-3 py-2.5
+           text-sm text-factory-100 placeholder:text-factory-500
+           focus:outline-none focus:ring-2 focus:ring-factory-500/50 focus:border-factory-500/70
+           transition-all duration-150;
+  }
+  .factory-input.error {
+    @apply border-red-500/70 focus:ring-red-500/30 animate-pulse-red;
+  }
+
+  /* ── 버튼 ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-factory-600 hover:bg-factory-500 active:bg-factory-700
+           text-white text-sm font-medium rounded-lg
+           transition-all duration-150 shadow-md hover:shadow-factory-glow
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-factory-800/60 hover:bg-factory-700/60 border border-factory-600/40
+           text-factory-200 text-sm font-medium rounded-lg
+           transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-red-600/80 hover:bg-red-500 border border-red-500/40
+           text-white text-sm font-medium rounded-lg
+           transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  /* ── 레이블 ── */
+  .factory-label {
+    @apply block text-xs font-medium text-factory-300 mb-1.5 tracking-wide uppercase;
+  }
+
+  /* ── 상태 배지 ── */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border;
+  }
+  .status-badge.drafting    { @apply bg-slate-700/40 text-slate-300 border-slate-600/50; }
+  .status-badge.review      { @apply bg-amber-900/40 text-amber-300 border-amber-600/50; }
+  .status-badge.approved    { @apply bg-green-900/40 text-green-300 border-green-600/50; }
+
+  /* ── CAPA 경고 배너 ── */
+  .capa-error-banner {
+    @apply flex items-start gap-3 p-4 bg-red-950/60 border border-red-500/50 rounded-lg
+           animate-fade-in;
+  }
+
+  .capa-ok-banner {
+    @apply flex items-start gap-3 p-4 bg-green-950/40 border border-green-500/40 rounded-lg
+           animate-fade-in;
+  }
+
+  /* ── 사이드바 내비게이션 아이템 ── */
+  .sidebar-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-factory-400
+           hover:bg-factory-800/60 hover:text-factory-100
+           transition-all duration-150 text-sm font-medium cursor-pointer select-none;
+  }
+  .sidebar-item.active {
+    @apply bg-factory-700/60 text-factory-100 border border-factory-600/40;
+  }
+
+  /* ── 섹션 헤더 ── */
+  .section-header {
+    @apply flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-factory-500 mb-3;
+  }
+
+  /* ── 데이터 테이블 ── */
+  .data-table {
+    @apply w-full text-sm;
+  }
+  .data-table th {
+    @apply text-left text-xs font-semibold uppercase tracking-wider text-factory-400
+           py-3 px-4 border-b border-factory-700/50 bg-factory-900/40;
+  }
+  .data-table td {
+    @apply py-3 px-4 border-b border-factory-800/60 text-factory-200;
+  }
+  .data-table tr:hover td {
+    @apply bg-factory-800/30;
+  }
+
+  /* ── 스켈레톤 shimmer ── */
+  .skeleton {
+    @apply rounded bg-factory-800/60;
+    background-size: 200% 100%;
+    background-image: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.0) 0%,
+      rgba(255,255,255,0.04) 50%,
+      rgba(255,255,255,0.0) 100%
+    );
+    animation: shimmer 1.8s infinite linear;
+  }
+
+  /* ── 스크롤바 스타일링 ── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(30, 95, 170, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(30, 95, 170, 0.5);
+  }
+}
+
+/* ── 커스텀 Select 드롭다운 오버레이 ── */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
