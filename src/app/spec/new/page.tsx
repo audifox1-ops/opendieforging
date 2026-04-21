@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Save, ArrowLeft, Send, CheckCircle } from "lucide-react";
+import { useState, useCallback, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Save, ArrowLeft, Send, CheckCircle, Loader2 } from "lucide-react";
 import DashboardShell from "@/components/layout/DashboardShell";
 import InputSmartForm, { INITIAL_FORM_DATA, type SpecFormData } from "@/components/spec-form/InputSmartForm";
 import AiProcessPanel from "@/components/ai-suggestion/AiProcessPanel";
@@ -21,14 +21,41 @@ function generateDocNumber() {
   return `TW-${y}${m}${d}-${rand}`;
 }
 
-export default function NewSpecPage() {
-  const router  = useRouter();
+function NewSpecContent() {
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const cloneFrom    = searchParams.get("cloneFrom");
+
   const [formData, setFormData]       = useState<SpecFormData>(INITIAL_FORM_DATA);
   const [capaResults, setCapaResults] = useState<CapaValidationResult[]>([]);
   const [aiResult, setAiResult]       = useState<AiInferenceResult | null>(null);
   const [aiLoading, setAiLoading]     = useState(false);
   const [saveStatus, setSaveStatus]   = useState<"idle" | "saving" | "saved">("idle");
+  const [isCloning, setIsCloning]     = useState(false);
   const docNumber = useState(() => generateDocNumber())[0];
+
+  // 복제 데이터 로딩 로직
+  useEffect(() => {
+    if (cloneFrom) {
+      async function loadClone() {
+        setIsCloning(true);
+        try {
+          const original = await specService.getSpecById(cloneFrom);
+          if (original) {
+            setFormData(original.form_data);
+            if (original.ai_suggestion) {
+              setAiResult({ source: "mock", suggestion: original.ai_suggestion });
+            }
+          }
+        } catch (err) {
+          console.error("복제 로딩 실패:", err);
+        } finally {
+          setIsCloning(false);
+        }
+      }
+      loadClone();
+    }
+  }, [cloneFrom]);
 
   const canRequestAi =
     formData.material !== "" &&
@@ -98,10 +125,18 @@ export default function NewSpecPage() {
               <ArrowLeft className="w-3.5 h-3.5" />
               돌아가기
             </button>
-            <h1 className="text-2xl font-bold text-factory-100">신규 시방서 작성</h1>
+            <h1 className="text-2xl font-bold text-factory-100 flex items-center gap-2">
+              신규 시방서 작성
+              {isCloning && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/40 border border-amber-600/30 text-[10px] text-amber-300 animate-pulse">
+                  <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                  복제 중...
+                </span>
+              )}
+            </h1>
             <div className="flex items-center gap-3 mt-1">
               <span className="text-sm text-factory-400">문서 번호:</span>
-              <span className="text-sm font-mono font-semibold text-factory-200 bg-factory-900/60 px-2 py-0.5 rounded border border-factory-700/40">
+              <span className="text-sm font-mono font-semibold text-factory-200 bg-factory-900/60 px-2 py-0.5 rounded border border-factory-700/40 shadow-sm">
                 {docNumber}
               </span>
               <span className="status-badge drafting">작성 중 · Rev.1</span>
@@ -188,5 +223,19 @@ export default function NewSpecPage() {
         )}
       </div>
     </DashboardShell>
+  );
+}
+
+export default function NewSpecPage() {
+  return (
+    <Suspense fallback={
+      <DashboardShell>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="w-8 h-8 border-4 border-factory-800 border-t-factory-500 rounded-full animate-spin" />
+        </div>
+      </DashboardShell>
+    }>
+      <NewSpecContent />
+    </Suspense>
   );
 }

@@ -74,6 +74,9 @@
   .factory-input.error {
     @apply border-red-500/70 focus:ring-red-500/30 animate-pulse-red;
   }
+  .factory-input.success {
+    @apply border-green-500/70 focus:ring-green-500/30;
+  }
 
   /* ── 버튼 ── */
   .btn-primary {

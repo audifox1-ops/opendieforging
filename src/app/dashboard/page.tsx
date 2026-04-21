@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  FilePlus2, ClipboardCheck, Clock, CheckCircle2,
-  BarChart3, TrendingUp, Factory, AlertTriangle,
+  BarChart3, TrendingUp, Factory, AlertTriangle, Search, ArrowRight,
 } from "lucide-react";
 import DashboardShell from "@/components/layout/DashboardShell";
 import { SPEC_STATUSES } from "@/constants/pressLimits";
@@ -21,6 +20,7 @@ const STATUS_DISPLAY: Record<string, { label: string; cls: string; icon: React.R
 export default function DashboardPage() {
   const [specs, setSpecs]   = useState<Specification[]>([]);
   const [operator, setOp]   = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -52,19 +52,39 @@ export default function DashboardPage() {
     <DashboardShell>
       <div className="space-y-8 max-w-6xl mx-auto">
         {/* 환영 헤더 */}
-        <div className="flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-factory-100">
-              안녕하세요, {operator || "작업자"}님 👋
-            </h1>
-            <p className="text-factory-400 text-sm mt-1">
-              태웅 15,000T 단조 시방서 관리 시스템 · {new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "long" })}
-            </p>
+        <div className="flex items-center justify-between flex-wrap gap-6 bg-factory-900/40 p-6 rounded-2xl border border-factory-800/50 shadow-sm backdrop-blur-sm">
+          <div className="flex-1 min-w-[300px] space-y-4">
+            <div>
+              <h1 className="text-3xl font-bold text-white tracking-tight">
+                반갑습니다, <span className="text-factory-300">{operator || "작업자"}</span>님 👋
+              </h1>
+              <p className="text-factory-400 text-sm mt-1.5 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-500 shadow-green-500/50 shadow-sm" />
+                태웅 15,000T 시방서 관리 시스템 접속 중 · {new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })}
+              </p>
+            </div>
+
+            <div className="relative group max-w-xl">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-factory-500 group-focus-within:text-factory-300 transition-colors" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="문서 번호, 제품명으로 즉시 검색..."
+                className="w-full bg-factory-950/80 border border-factory-700/50 rounded-xl pl-11 pr-4 py-3 text-sm text-factory-100 placeholder:text-factory-600 focus:outline-none focus:ring-2 focus:ring-factory-500/30 focus:border-factory-500/50 transition-all shadow-inner"
+              />
+            </div>
           </div>
-          <Link id="btn-new-spec-hero" href="/spec/new" className="btn-primary">
-            <FilePlus2 className="w-4 h-4" />
-            신규 시방서 작성
-          </Link>
+
+          <div className="flex flex-col gap-3">
+            <Link id="btn-new-spec-hero" href="/spec/new" className="btn-primary px-8 py-3 dark-glow">
+              <FilePlus2 className="w-5 h-5" />
+              신규 시방서 작성
+            </Link>
+            <div className="flex items-center gap-4 px-2 text-[10px] text-factory-600 uppercase tracking-widest font-bold">
+               TAEWOONG OPEN-DIE PRESS V1.0
+            </div>
+          </div>
         </div>
 
         {/* KPI 카드 */}
@@ -128,13 +148,19 @@ export default function DashboardPage() {
 
         {/* 최근 시방서 목록 */}
         <section className="factory-card overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-factory-800/50">
-            <div className="flex items-center gap-2 text-sm font-semibold text-factory-200">
-              <TrendingUp className="w-4 h-4 text-factory-400" />
-              최근 시방서
+          <div className="flex items-center justify-between px-6 py-5 border-b border-factory-800/50 bg-factory-950/20">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-factory-600/20 border border-factory-500/30 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-factory-300" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-factory-100 uppercase tracking-tight">최근 활동 내역</h3>
+                <p className="text-[10px] text-factory-500 mt-0.5">가장 최근에 업데이트된 시방서 10개</p>
+              </div>
             </div>
-            <Link id="btn-view-all" href="/spec/list" className="text-xs text-factory-400 hover:text-factory-200 transition-colors">
-              전체 보기 →
+            <Link id="btn-view-all" href="/spec/list" className="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-factory-800/40 text-xs text-factory-400 hover:text-factory-200 transition-all font-medium">
+              전체 보기 
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -165,7 +191,12 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                    {specs.slice(0, 10).map((spec, i) => {
+                    {specs
+                      .filter(s => {
+                        const q = searchQuery.toLowerCase();
+                        return s.doc_number.toLowerCase().includes(q) || (s.product_name || "").toLowerCase().includes(q);
+                      })
+                      .slice(0, 10).map((spec, i) => {
                     const st = STATUS_DISPLAY[spec.status] ?? STATUS_DISPLAY.DRAFTING;
                     return (
                       <tr key={spec.id || i} className="cursor-pointer hover:bg-factory-800/10 transition-colors" onClick={() => {}}>

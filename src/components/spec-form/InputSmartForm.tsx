@@ -60,7 +60,15 @@ export default function InputSmartForm({
     onChange({ ...data, [key]: value });
   }
 
-  const hasCapaError = capaResults.some((r) => !r.result.passed);
+  // 필드별 검증 상태 계산
+  const getFieldStatus = (fieldName: string) => {
+    const val = fieldName === "od" ? data.od_mm : fieldName === "height" ? data.height_mm : data.weight_kg;
+    if (!val) return "";
+    
+    const fieldResult = capaResults.find(r => r.type === fieldName);
+    if (!fieldResult) return "success"; // 결과는 없는데 값은 있으면 기본적으로 통과로 간주 (혹은 success)
+    return fieldResult.result.passed ? "success" : "error";
+  };
 
   return (
     <div className="space-y-8">
@@ -159,7 +167,7 @@ export default function InputSmartForm({
                 value={data.od_mm}
                 onChange={(e) => set("od_mm", e.target.value)}
                 placeholder="0"
-                className={`factory-input pr-12 ${hasCapaError ? "error" : ""}`}
+                className={`factory-input pr-12 ${getFieldStatus("od")}`}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
                 mm
@@ -182,7 +190,7 @@ export default function InputSmartForm({
                 value={data.height_mm}
                 onChange={(e) => set("height_mm", e.target.value)}
                 placeholder="0"
-                className={`factory-input pr-12 ${hasCapaError ? "error" : ""}`}
+                className={`factory-input pr-12 ${getFieldStatus("height")}`}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
                 mm
@@ -212,7 +220,7 @@ export default function InputSmartForm({
                 value={data.weight_kg}
                 onChange={(e) => set("weight_kg", e.target.value)}
                 placeholder="0"
-                className={`factory-input pr-12 ${hasCapaError ? "error" : ""}`}
+                className={`factory-input pr-12 ${getFieldStatus("weight")}`}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
                 kg

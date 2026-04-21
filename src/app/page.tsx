@@ -11,11 +11,11 @@ export default function LandingPage() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // 이미 이름이 저장되어 있으면 대시보드로 이동
+  // 컴포넌트 마운트 시 로컬 스토리지에서 마지막 이름 가져오기
   useEffect(() => {
-    const stored = safeStorage.get("session", "tw_operator_name");
-    if (stored) router.replace("/dashboard");
-  }, [router]);
+    const remembered = safeStorage.get("local", "tw_operator_name");
+    if (remembered) setName(remembered);
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,7 +29,9 @@ export default function LandingPage() {
       return;
     }
     setIsLoading(true);
+    // 세션 및 로컬 스토리지 모두 저장
     safeStorage.set("session", "tw_operator_name", trimmed);
+    safeStorage.set("local", "tw_operator_name", trimmed);
     safeStorage.set("session", "tw_login_time", new Date().toISOString());
     router.push("/dashboard");
   }

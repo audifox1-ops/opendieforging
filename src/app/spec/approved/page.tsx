@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, FilePlus2, FileDown } from "lucide-react";
+import { CheckCircle2, FilePlus2, FileDown, Search } from "lucide-react";
 import Link from "next/link";
 import DashboardShell from "@/components/layout/DashboardShell";
 import { specService, type Specification } from "@/lib/supabase/specService";
 
 export default function ApprovedPage() {
   const [specs, setSpecs] = useState<Specification[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -24,12 +25,30 @@ export default function ApprovedPage() {
     loadData();
   }, []);
 
+  const filtered = specs.filter((s) => {
+    const q = searchQuery.toLowerCase();
+    return s.doc_number.toLowerCase().includes(q) || (s.product_name || "").toLowerCase().includes(q);
+  });
+
   return (
     <DashboardShell>
       <div className="max-w-6xl mx-auto space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-factory-100">승인 완료 시방서</h1>
-          <p className="text-sm text-factory-400 mt-1">승인 완료 {specs.length}건</p>
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-factory-100 uppercase tracking-tight">승인 완료 시방서</h1>
+            <p className="text-sm text-factory-400 mt-1">총 {specs.length}건의 문서가 최종 승인되었습니다.</p>
+          </div>
+          
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-factory-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="문서 번호, 제품명 검색..."
+              className="factory-input pl-10 h-10 text-xs"
+            />
+          </div>
         </div>
         <section className="factory-card overflow-hidden">
           {specs.length === 0 ? (
@@ -50,7 +69,7 @@ export default function ApprovedPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {specs.map((spec, i) => (
+                  {filtered.map((spec, i) => (
                     <tr key={spec.id || i} className="hover:bg-factory-800/10 cursor-pointer">
                       <td><span className="font-mono text-xs text-factory-300">{spec.doc_number}</span></td>
                       <td className="font-medium text-factory-100">{spec.product_name || "-"}</td>
