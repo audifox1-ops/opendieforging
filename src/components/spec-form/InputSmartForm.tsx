@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { Ruler, Weight, Layers, FlaskConical, Thermometer, ShieldCheck } from "lucide-react";
+import {
+  Ruler, Weight, Layers, FlaskConical, Thermometer, ShieldCheck,
+  Plus, Trash2, ArrowUp, ArrowDown, Zap
+} from "lucide-react";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import CapaWarningBadge from "@/components/spec-form/CapaWarningBadge";
 import {
@@ -11,7 +14,6 @@ import {
 } from "@/constants/pressLimits";
 import { validateForging, type ForgingInput, type CapaValidationResult } from "@/lib/capaValidator";
 import { calculateTargetWeight } from "@/lib/weightCalculator";
-import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 
 export interface ForgingStep {
   id: string;
