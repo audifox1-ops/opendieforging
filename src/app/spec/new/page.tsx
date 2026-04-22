@@ -194,6 +194,7 @@ function NewSpecContent() {
           isLoading={aiLoading}
           onRequest={handleAiRequest}
           canRequest={canRequestAi}
+          onApply={(s) => setFormData(prev => ({ ...prev, workingMethod: s.workingMethod }))}
         />
 
         {/* 요약 미리보기 */}

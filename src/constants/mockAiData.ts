@@ -10,6 +10,7 @@ export interface AiSuggestion {
   forgingTempMax_C: number;
   heatingRate_mmPerHr: number;
   soakingTime_hrPer100mm: number;
+  workingMethod: string;
   heatTreatment: {
     quenchTemp_C?: number;
     quenchMedia?: string;
@@ -26,6 +27,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "크롬-몰리브덴강 특유의 고온 강도를 고려하여 1,150°C 부근에서 주 단조 작업을 수행하고, 1,100°C 이하에서는 작업을 중단한 후 재가열을 실시하십시오. 수소 취화 방지를 위해 단조 후 서냉이 필수적입니다.",
     heatTreatment: {
       quenchTemp_C: 900,
       quenchMedia: "Water or Oil",
@@ -44,6 +46,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "1.25Cr-0.5Mo 저합금강으로, 열간 가공성이 우수하나 결정립 성장을 방지하기 위해 1,230°C 이상 과열에 주의하십시오. 단조비(Forging Ratio) 3:1 이상 확보를 권장합니다.",
     heatTreatment: {
       quenchTemp_C: 900,
       quenchMedia: "Water or Oil",
@@ -61,6 +64,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1230,
     heatingRate_mmPerHr: 60,
     soakingTime_hrPer100mm: 1.2,
+    workingMethod: "고합금 마르텐사이트 강으로, 매우 엄격한 온도 관리가 필요합니다. 델타 페라이트 생성을 방지하기 위해 최대 온도를 1,230°C 이하로 제한하고, 단조 후 마르텐사이트 변태 완료를 위해 100°C 이하까지 충분히 냉각한 후 즉시 템퍼링을 실시하십시오.",
     heatTreatment: {
       normalizingTemp_C: 1050,
       temperTemp_C: 760,
@@ -78,6 +82,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 100,
     soakingTime_hrPer100mm: 0.8,
+    workingMethod: "일반 탄소강으로 가공성이 매우 우수합니다. 1,200°C 수준에서 작업을 시작하여 고능률 단조가 가능하나, 최종 단조 온도가 너무 낮아지지 않도록 주의하여 결정립 미세화를 도모하십시오.",
     heatTreatment: {
       normalizingTemp_C: 870,
       description: "정규화(870°C) — ASTM A105 탄소강 표준 처리",
@@ -93,6 +98,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1280,
     heatingRate_mmPerHr: 50,
     soakingTime_hrPer100mm: 1.5,
+    workingMethod: "오스테나이트계 스테인리스강으로 열전도율이 낮으므로 예열 및 승온 시간을 충분히 확보하십시오. 예민화 구간(500~850°C)을 최대한 빨리 통과할 수 있도록 단조 후 신속히 수냉 또는 고용화 열처리를 실시하십시오.",
     heatTreatment: {
       normalizingTemp_C: 1040,
       quenchMedia: "Water (급냉)",
@@ -110,6 +116,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1280,
     heatingRate_mmPerHr: 50,
     soakingTime_hrPer100mm: 1.5,
+    workingMethod: "304 SS는 316에 비해 고온 강도가 약간 낮으므로 작업이 용이하나, 오염 방지 및 스케일 관리에 주의하십시오. 단조 후 고용화 처리를 통해 내부 응력을 제거하고 내식성을 회복시키십시오.",
     heatTreatment: {
       normalizingTemp_C: 1040,
       quenchMedia: "Water (급냉)",
@@ -126,6 +133,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "압력용기용 탄소강으로, 내부 건전성 확보가 최우선입니다. 중심부까지 충분한 압하력이 전달되도록 큰 하중의 프레스 작업을 수행하고, 수소 유입 방지를 위해 건조한 환경을 유지하십시오.",
     heatTreatment: {
       quenchTemp_C: 870,
       quenchMedia: "Water or Oil",
@@ -143,6 +151,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1230,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "저온 충격치가 중요한 강종입니다. 조대한 결정립이 형성되지 않도록 최종 단조 온도를 950°C 부근에서 마무리하는 것이 유리하며, 단조 후 정규화 처리를 통해 조직을 균질화하십시오.",
     heatTreatment: {
       normalizingTemp_C: 900,
       temperTemp_C: 620,
@@ -159,6 +168,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "SA-182 F22는 고온 고압 환경에 사용되므로 내부 결함(Porosity) 제거를 위한 강력한 압하가 필요합니다. 단조 완료 후 변태 온도 구간에서의 냉각 속도를 엄격히 준수하십시오.",
     heatTreatment: {
       quenchTemp_C: 900,
       quenchMedia: "Water or Oil",
@@ -176,6 +186,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "대형 압력용기용 단조품으로, 장시간 가열에 따른 탈탄층 발생에 주의하십시오. 단조 후 등온 어닐링 또는 Q/T 처리를 통해 규격에서 요구하는 기계적 성질을 확보하십시오.",
     heatTreatment: {
       quenchTemp_C: 900,
       quenchMedia: "Water or Oil",
@@ -192,6 +203,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1250,
     heatingRate_mmPerHr: 80,
     soakingTime_hrPer100mm: 1.0,
+    workingMethod: "유럽 규격 강종으로 EN 10222-2 지침을 준수하십시오. 단조 작업 시 표면 균열 방지를 위해 급격한 온도 변화를 피하고, 균일한 가열 상태를 유지하십시오.",
     heatTreatment: {
       quenchTemp_C: 900,
       quenchMedia: "Water or Oil",
@@ -209,6 +221,7 @@ export const MOCK_AI_DATA: Record<string, AiSuggestion> = {
     forgingTempMax_C: 1200,
     heatingRate_mmPerHr: 60,
     soakingTime_hrPer100mm: 1.2,
+    workingMethod: "마르텐사이트계 내열강으로 매우 까다로운 단조성을 가집니다. 좁은 온도 범위(1,050~1,200°C)에서 신속하게 작업을 완료해야 하며, 균열 민감도가 높으므로 예열 및 후열 관리에 만전을 기하십시오.",
     heatTreatment: {
       normalizingTemp_C: 1050,
       temperTemp_C: 750,
@@ -228,6 +241,7 @@ export const DEFAULT_AI_SUGGESTION: AiSuggestion = {
   forgingTempMax_C: 1250,
   heatingRate_mmPerHr: 80,
   soakingTime_hrPer100mm: 1.0,
+  workingMethod: "일반적인 단조 공정을 따르되, 소재의 규격서를 참조하여 가열 및 냉각 조건을 결정하십시오. 대형 중량물의 경우 중심부 균열 방지를 위한 서냉이 필요할 수 있습니다.",
   heatTreatment: {
     description: "규격에 따른 열처리 조건을 별도 확인하세요.",
   },

@@ -47,8 +47,14 @@ export async function inferProcess(
     };
   } catch (err) {
     console.warn("[aiInference] Gemini 호출 실패, Mock 데이터 폴백:", err);
-    // Mock 데이터 폴백
     const mock = MOCK_AI_DATA[input.material] ?? DEFAULT_AI_SUGGESTION;
-    return { suggestion: mock, source: "mock" };
+    const suggestion = { ...mock };
+
+    // 중량 기반 작업 방식 보완 로직 (예: 50톤 이상)
+    if (input.weight_kg && input.weight_kg >= 50000) {
+      suggestion.workingMethod = `[대형 중량물 특이사항] ${suggestion.workingMethod} 추가로, 대형 중량물(50톤 이상)이므로 심부 가열을 위해 소킹 시간을 20% 상향하고, 핸들러 조작 시 관성 하중에 의한 장비 충격에 각별히 유의하십시오.`;
+    }
+
+    return { suggestion, source: "mock" };
   }
 }

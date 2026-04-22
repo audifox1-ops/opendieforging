@@ -203,20 +203,36 @@ export default function SpecPdfDocument({ spec }: SpecPdfDocumentProps) {
           </View>
         </View>
 
+        {/* 작업 방식 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>2. 작업 방식 (Working Method)</Text>
+          <View style={[styles.table, { padding: 10 }]}>
+            <Text style={{ fontSize: 9, lineHeight: 1.5 }}>
+              {fd.workingMethod || "소재 및 중량에 따른 표준 단조 공정 절차를 준수하십시오."}
+            </Text>
+          </View>
+        </View>
+
         {/* 치수 및 설비 검증 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>2. 치수 및 설비 검증 (Dimensions & CAPA)</Text>
+          <Text style={styles.sectionTitle}>3. 치수 및 설비 검증 (Dimensions & CAPA)</Text>
           <View style={styles.table}>
             <View style={styles.tableRow}>
               <Text style={styles.tableLabel}>외경 (OD)</Text>
-              <Text style={styles.tableValue}>{fd.od_mm} mm</Text>
+              <Text style={styles.tableValue}>
+                {fd.od_mm} mm {fd.od_tol_plus && fd.od_tol_minus ? `(${fd.od_tol_plus} / ${fd.od_tol_minus})` : ""}
+              </Text>
               <Text style={styles.tableLabel}>높이 (Height)</Text>
-              <Text style={styles.tableValue}>{fd.height_mm} mm</Text>
+              <Text style={styles.tableValue}>
+                {fd.height_mm} mm {fd.height_tol_plus && fd.height_tol_minus ? `(${fd.height_tol_plus} / ${fd.height_tol_minus})` : ""}
+              </Text>
             </View>
             {(fd.shape === "RING" || fd.shape === "SHELL" || fd.shape === "PIPE") && fd.id_mm && (
               <View style={styles.tableRow}>
                 <Text style={styles.tableLabel}>내경 (ID)</Text>
-                <Text style={styles.tableValue}>{fd.id_mm} mm</Text>
+                <Text style={styles.tableValue}>
+                  {fd.id_mm} mm {fd.id_tol_plus && fd.id_tol_minus ? `(${fd.id_tol_plus} / ${fd.id_tol_minus})` : ""}
+                </Text>
                 <Text style={styles.tableLabel}></Text>
                 <Text style={styles.tableValue}></Text>
               </View>
@@ -230,9 +246,40 @@ export default function SpecPdfDocument({ spec }: SpecPdfDocumentProps) {
           </View>
         </View>
 
+        {/* 상세 단조 공정 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>4. 상세 단조 공정 (Forging Sequence)</Text>
+          <View style={styles.table}>
+            <View style={[styles.tableRow, { backgroundColor: "#f9fafb" }]}>
+              <Text style={[styles.tableCol, { width: "10%", fontWeight: "bold", textAlign: "center" }]}>순번</Text>
+              <Text style={[styles.tableCol, { width: "25%", fontWeight: "bold" }]}>공정명</Text>
+              <Text style={[styles.tableCol, { width: "25%", fontWeight: "bold" }]}>목표치수</Text>
+              <Text style={[styles.tableCol, { width: "15%", fontWeight: "bold" }]}>온도</Text>
+              <Text style={[styles.tableCol, { width: "25%", fontWeight: "bold" }]}>비고</Text>
+            </View>
+            {fd.steps && fd.steps.length > 0 ? (
+              fd.steps.map((step: any, i: number) => (
+                <View key={step.id} style={styles.tableRow}>
+                  <Text style={[styles.tableCol, { width: "10%", textAlign: "center" }]}>{i + 1}</Text>
+                  <Text style={[styles.tableCol, { width: "25%" }]}>{step.stepName}</Text>
+                  <Text style={[styles.tableCol, { width: "25%" }]}>{step.targetDimension}</Text>
+                  <Text style={[styles.tableCol, { width: "15%" }]}>{step.temp_C}°C</Text>
+                  <Text style={[styles.tableCol, { width: "25%" }]}>{step.notes}</Text>
+                </View>
+              ))
+            ) : (
+              <View style={styles.tableRow}>
+                <Text style={[styles.tableCol, { width: "100%", textAlign: "center", color: "#999" }]}>
+                  등록된 상세 공정이 없습니다.
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+
         {/* AI 추천 공정 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>3. AI 추천 공정 파라미터 (Process Suggestions)</Text>
+          <Text style={styles.sectionTitle}>5. AI 추천 공정 파라미터 (Process Suggestions)</Text>
           <View style={styles.aiBox}>
             <Text style={styles.aiTitle}>Gemini AI 최적 공정 제안</Text>
             <Text style={styles.aiText}>{ai || "가열 온도: 1150-1250°C\n유지 시간: 100mm/h 기준\n열처리: Q/T (870°C 담금질 / 620°C 템퍼링)"}</Text>

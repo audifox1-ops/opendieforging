@@ -14,10 +14,11 @@ interface AiProcessPanelProps {
   isLoading: boolean;
   onRequest: () => void;
   canRequest: boolean;
+  onApply?: (suggestion: AiSuggestion) => void;
 }
 
 export default function AiProcessPanel({
-  result, isLoading, onRequest, canRequest,
+  result, isLoading, onRequest, canRequest, onApply,
 }: AiProcessPanelProps) {
   const [expanded, setExpanded] = useState(true);
   const s = result?.suggestion;
@@ -169,8 +170,29 @@ export default function AiProcessPanel({
                 />
               </div>
 
+              {/* 작업 방식 제안 */}
+              <div className="p-4 rounded-lg bg-factory-900/60 border border-factory-500/30">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-factory-300 uppercase tracking-wide">
+                    작업 방식 제안 (Working Method)
+                  </p>
+                  {onApply && (
+                    <button
+                      onClick={() => onApply(s)}
+                      className="text-[10px] px-2 py-1 bg-factory-700 hover:bg-factory-600 text-factory-100 rounded transition-colors flex items-center gap-1"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      폼에 적용
+                    </button>
+                  )}
+                </div>
+                <p className="text-sm text-factory-100 leading-relaxed">
+                  {s.workingMethod}
+                </p>
+              </div>
+
               {/* 열처리 설명 */}
-              <div className="p-4 rounded-lg bg-factory-900/60 border border-factory-800/40">
+              <div className="p-4 rounded-lg bg-factory-900/40 border border-factory-800/40">
                 <p className="text-xs font-semibold text-factory-400 uppercase tracking-wide mb-1">
                   열처리 사이클
                 </p>

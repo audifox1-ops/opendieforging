@@ -11,6 +11,15 @@ import {
 } from "@/constants/pressLimits";
 import { validateForging, type ForgingInput, type CapaValidationResult } from "@/lib/capaValidator";
 import { calculateTargetWeight } from "@/lib/weightCalculator";
+import { Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react";
+
+export interface ForgingStep {
+  id: string;
+  stepName: string;
+  targetDimension: string;
+  temp_C: string;
+  notes: string;
+}
 
 export interface SpecFormData {
   productName: string;
@@ -19,11 +28,19 @@ export interface SpecFormData {
   ndtStandard: NdtStandard | "";
   ndtClass: string;
   od_mm: string;
+  od_tol_plus: string;
+  od_tol_minus: string;
   id_mm: string;
+  id_tol_plus: string;
+  id_tol_minus: string;
   height_mm: string;
+  height_tol_plus: string;
+  height_tol_minus: string;
   weight_kg: string;
   htCoolingMedia: HtCoolingMedia | "";
   htType: HtType | "";
+  workingMethod: string;
+  steps: ForgingStep[];
   remarks: string;
 }
 
@@ -36,7 +53,11 @@ interface InputSmartFormProps {
 
 export const INITIAL_FORM_DATA: SpecFormData = {
   productName: "", shape: "", material: "", ndtStandard: "", ndtClass: "",
-  od_mm: "", id_mm: "", height_mm: "", weight_kg: "", htCoolingMedia: "", htType: "", remarks: "",
+  od_mm: "", od_tol_plus: "", od_tol_minus: "",
+  id_mm: "", id_tol_plus: "", id_tol_minus: "",
+  height_mm: "", height_tol_plus: "", height_tol_minus: "",
+  weight_kg: "", htCoolingMedia: "", htType: "", workingMethod: "", 
+  steps: [], remarks: "",
 };
 
 export default function InputSmartForm({
@@ -81,6 +102,30 @@ export default function InputSmartForm({
   function set<K extends keyof SpecFormData>(key: K, value: SpecFormData[K]) {
     onChange({ ...data, [key]: value });
   }
+
+  const addStep = () => {
+    const newStep: ForgingStep = {
+      id: Math.random().toString(36).substr(2, 9),
+      stepName: "", targetDimension: "", temp_C: "", notes: ""
+    };
+    set("steps", [...data.steps, newStep]);
+  };
+
+  const removeStep = (id: string) => {
+    set("steps", data.steps.filter(s => s.id !== id));
+  };
+
+  const updateStep = (id: string, updates: Partial<ForgingStep>) => {
+    set("steps", data.steps.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const moveStep = (index: number, direction: "up" | "down") => {
+    const newSteps = [...data.steps];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newSteps.length) return;
+    [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
+    set("steps", newSteps);
+  };
 
   // 필드별 검증 상태 계산
   const getFieldStatus = (fieldName: string) => {
@@ -178,74 +223,111 @@ export default function InputSmartForm({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
           {/* OD */}
-          <div>
+          <div className="space-y-2">
             <label className="factory-label">외경 OD (mm)</label>
-            <div className="relative">
-              <input
-                id="field-od"
-                type="number"
-                min="0"
-                step="1"
-                value={data.od_mm}
-                onChange={(e) => set("od_mm", e.target.value)}
-                placeholder="0"
-                className={`factory-input pr-12 ${getFieldStatus("od")}`}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
-                mm
-              </span>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  id="field-od"
+                  type="number"
+                  value={data.od_mm}
+                  onChange={(e) => set("od_mm", e.target.value)}
+                  placeholder="0"
+                  className={`factory-input pr-12 ${getFieldStatus("od")}`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-factory-500 font-mono">mm</span>
+              </div>
+              <div className="flex flex-col gap-1 w-20">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={data.od_tol_plus}
+                    onChange={(e) => set("od_tol_plus", e.target.value)}
+                    placeholder="+0"
+                    className="factory-input h-7 text-[10px] px-2"
+                  />
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={data.od_tol_minus}
+                    onChange={(e) => set("od_tol_minus", e.target.value)}
+                    placeholder="-0"
+                    className="factory-input h-7 text-[10px] px-2"
+                  />
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-factory-600 mt-1">
-              한계: ≤ 3,500 mm (M.P-Die)
-            </p>
           </div>
 
-          {/* ID (내경) - RING, SHELL, PIPE일 때만 표시 */}
+          {/* ID (내경) */}
           {(data.shape === "RING" || data.shape === "SHELL" || data.shape === "PIPE") && (
-            <div>
+            <div className="space-y-2">
               <label className="factory-label">내경 ID (mm)</label>
-              <div className="relative">
-                <input
-                  id="field-id"
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={data.id_mm}
-                  onChange={(e) => set("id_mm", e.target.value)}
-                  placeholder="0"
-                  className="factory-input pr-12"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
-                  mm
-                </span>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    id="field-id"
+                    type="number"
+                    value={data.id_mm}
+                    onChange={(e) => set("id_mm", e.target.value)}
+                    placeholder="0"
+                    className="factory-input pr-12"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-factory-500 font-mono">mm</span>
+                </div>
+                <div className="flex flex-col gap-1 w-20">
+                  <input
+                    type="text"
+                    value={data.id_tol_plus}
+                    onChange={(e) => set("id_tol_plus", e.target.value)}
+                    placeholder="+0"
+                    className="factory-input h-7 text-[10px] px-2"
+                  />
+                  <input
+                    type="text"
+                    value={data.id_tol_minus}
+                    onChange={(e) => set("id_tol_minus", e.target.value)}
+                    placeholder="-0"
+                    className="factory-input h-7 text-[10px] px-2"
+                  />
+                </div>
               </div>
-              <p className="text-xs text-factory-600 mt-1">
-                내경이 있는 경우 입력
-              </p>
             </div>
           )}
 
           {/* Height */}
-          <div>
+          <div className="space-y-2">
             <label className="factory-label">높이 / 길이 Height (mm)</label>
-            <div className="relative">
-              <input
-                id="field-height"
-                type="number"
-                min="0"
-                step="1"
-                value={data.height_mm}
-                onChange={(e) => set("height_mm", e.target.value)}
-                placeholder="0"
-                className={`factory-input pr-12 ${getFieldStatus("height")}`}
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
-                mm
-              </span>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  id="field-height"
+                  type="number"
+                  value={data.height_mm}
+                  onChange={(e) => set("height_mm", e.target.value)}
+                  placeholder="0"
+                  className={`factory-input pr-12 ${getFieldStatus("height")}`}
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-factory-500 font-mono">mm</span>
+              </div>
+              <div className="flex flex-col gap-1 w-20">
+                <input
+                  type="text"
+                  value={data.height_tol_plus}
+                  onChange={(e) => set("height_tol_plus", e.target.value)}
+                  placeholder="+0"
+                  className="factory-input h-7 text-[10px] px-2"
+                />
+                <input
+                  type="text"
+                  value={data.height_tol_minus}
+                  onChange={(e) => set("height_tol_minus", e.target.value)}
+                  placeholder="-0"
+                  className="factory-input h-7 text-[10px] px-2"
+                />
+              </div>
             </div>
-            <p className="text-xs text-factory-600 mt-1">
-              한계: ≤ 3,500 mm (M.P-Die)
-            </p>
           </div>
 
           {/* Weight */}
@@ -317,7 +399,112 @@ export default function InputSmartForm({
         </div>
       </section>
 
-      {/* ── 섹션 5: 비고 ── */}
+      {/* ── 섹션 5: 작업 방식 ── */}
+      <section className="factory-card p-6">
+        <div className="section-header mb-5 text-factory-300 font-bold">
+          <Zap className="w-4 h-4 text-factory-300" />
+          작업 방식 (Working Method) — 소재 및 중량 기반
+        </div>
+        <textarea
+          id="field-working-method"
+          value={data.workingMethod}
+          onChange={(e) => set("workingMethod", e.target.value)}
+          placeholder="소재 특성 및 중량에 따른 단조 작업 지침을 입력하세요."
+          rows={3}
+          className="factory-input resize-none border-factory-500/30 focus:border-factory-400 bg-factory-900/40"
+        />
+      </section>
+
+      {/* ── 섹션 6: 상세 단조 공정 (Sequence) ── */}
+      <section className="factory-card p-6">
+        <div className="flex items-center justify-between mb-5">
+          <div className="section-header !mb-0 text-factory-100 font-bold">
+            상세 단조 공정 (Forging Sequence)
+          </div>
+          <button
+            type="button"
+            onClick={addStep}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-factory-700 hover:bg-factory-600 text-factory-100 text-xs rounded-lg transition-colors border border-factory-500/30"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            공정 단계 추가
+          </button>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-factory-900/60 text-factory-400 border-b border-factory-800">
+                <th className="p-3 font-medium w-12 text-center">순서</th>
+                <th className="p-3 font-medium w-40">공정명 (Step)</th>
+                <th className="p-3 font-medium w-48">목표 치수 (Target)</th>
+                <th className="p-3 font-medium w-32">온도 (°C)</th>
+                <th className="p-3 font-medium">비고 및 주의사항</th>
+                <th className="p-3 font-medium w-24 text-center">관리</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-factory-800/50">
+              {data.steps.map((step, index) => (
+                <tr key={step.id} className="group hover:bg-factory-800/20 transition-colors">
+                  <td className="p-3 text-center text-factory-500 font-mono">{index + 1}</td>
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={step.stepName}
+                      onChange={(e) => updateStep(step.id, { stepName: e.target.value })}
+                      placeholder="예: Upsetting"
+                      className="factory-input py-1.5 bg-transparent border-transparent hover:border-factory-700 focus:bg-factory-900"
+                    />
+                  </td>
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={step.targetDimension}
+                      onChange={(e) => updateStep(step.id, { targetDimension: e.target.value })}
+                      placeholder="예: OD 1200 / H 800"
+                      className="factory-input py-1.5 bg-transparent border-transparent hover:border-factory-700 focus:bg-factory-900"
+                    />
+                  </td>
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={step.temp_C}
+                      onChange={(e) => updateStep(step.id, { temp_C: e.target.value })}
+                      placeholder="1200"
+                      className="factory-input py-1.5 bg-transparent border-transparent hover:border-factory-700 focus:bg-factory-900 font-mono"
+                    />
+                  </td>
+                  <td className="p-2">
+                    <input
+                      type="text"
+                      value={step.notes}
+                      onChange={(e) => updateStep(step.id, { notes: e.target.value })}
+                      placeholder="주의사항 입력..."
+                      className="factory-input py-1.5 bg-transparent border-transparent hover:border-factory-700 focus:bg-factory-900"
+                    />
+                  </td>
+                  <td className="p-2">
+                    <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => moveStep(index, "up")} className="p-1 text-factory-500 hover:text-factory-300"><ArrowUp className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => moveStep(index, "down")} className="p-1 text-factory-500 hover:text-factory-300"><ArrowDown className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => removeStep(step.id)} className="p-1 text-red-400/70 hover:text-red-400"><Trash2 className="w-3.5 h-3.5" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {data.steps.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="p-10 text-center text-factory-600 italic">
+                    등록된 공정 단계가 없습니다. '공정 단계 추가' 버튼을 눌러 작업을 구성하세요.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ── 섹션 7: 비고 ── */}
       <section className="factory-card p-6">
         <div className="section-header mb-5">
           <FlaskConical className="w-4 h-4 text-factory-400" />
