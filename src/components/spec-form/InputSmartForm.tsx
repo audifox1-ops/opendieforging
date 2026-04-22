@@ -19,6 +19,7 @@ export interface SpecFormData {
   ndtStandard: NdtStandard | "";
   ndtClass: string;
   od_mm: string;
+  id_mm: string;
   height_mm: string;
   weight_kg: string;
   htCoolingMedia: HtCoolingMedia | "";
@@ -35,7 +36,7 @@ interface InputSmartFormProps {
 
 export const INITIAL_FORM_DATA: SpecFormData = {
   productName: "", shape: "", material: "", ndtStandard: "", ndtClass: "",
-  od_mm: "", height_mm: "", weight_kg: "", htCoolingMedia: "", htType: "", remarks: "",
+  od_mm: "", id_mm: "", height_mm: "", weight_kg: "", htCoolingMedia: "", htType: "", remarks: "",
 };
 
 export default function InputSmartForm({
@@ -46,6 +47,7 @@ export default function InputSmartForm({
   const runCapa = useCallback((formData: SpecFormData) => {
     const input: ForgingInput = {
       od_mm:     formData.od_mm     ? parseFloat(formData.od_mm)     : null,
+      id_mm:     formData.id_mm     ? parseFloat(formData.id_mm)     : null,
       height_mm: formData.height_mm ? parseFloat(formData.height_mm) : null,
       weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : null,
       shape:     (formData.shape as ForgingShape) || null,
@@ -56,6 +58,7 @@ export default function InputSmartForm({
       const calculated = calculateTargetWeight({
         shape: input.shape,
         od_mm: input.od_mm,
+        id_mm: input.id_mm,
         height_mm: input.height_mm
       });
       
@@ -73,7 +76,7 @@ export default function InputSmartForm({
 
   useEffect(() => { 
     runCapa(data); 
-  }, [data.od_mm, data.height_mm, data.shape, runCapa]);
+  }, [data.od_mm, data.id_mm, data.height_mm, data.shape, runCapa]);
 
   function set<K extends keyof SpecFormData>(key: K, value: SpecFormData[K]) {
     onChange({ ...data, [key]: value });
@@ -196,6 +199,31 @@ export default function InputSmartForm({
               한계: ≤ 3,500 mm (M.P-Die)
             </p>
           </div>
+
+          {/* ID (내경) - RING, SHELL, PIPE일 때만 표시 */}
+          {(data.shape === "RING" || data.shape === "SHELL" || data.shape === "PIPE") && (
+            <div>
+              <label className="factory-label">내경 ID (mm)</label>
+              <div className="relative">
+                <input
+                  id="field-id"
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={data.id_mm}
+                  onChange={(e) => set("id_mm", e.target.value)}
+                  placeholder="0"
+                  className="factory-input pr-12"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-factory-500 font-mono pointer-events-none">
+                  mm
+                </span>
+              </div>
+              <p className="text-xs text-factory-600 mt-1">
+                내경이 있는 경우 입력
+              </p>
+            </div>
+          )}
 
           {/* Height */}
           <div>

@@ -213,6 +213,14 @@ export default function SpecPdfDocument({ spec }: SpecPdfDocumentProps) {
               <Text style={styles.tableLabel}>높이 (Height)</Text>
               <Text style={styles.tableValue}>{fd.height_mm} mm</Text>
             </View>
+            {(fd.shape === "RING" || fd.shape === "SHELL" || fd.shape === "PIPE") && fd.id_mm && (
+              <View style={styles.tableRow}>
+                <Text style={styles.tableLabel}>내경 (ID)</Text>
+                <Text style={styles.tableValue}>{fd.id_mm} mm</Text>
+                <Text style={styles.tableLabel}></Text>
+                <Text style={styles.tableValue}></Text>
+              </View>
+            )}
             <View style={styles.tableRow}>
               <Text style={styles.tableLabel}>중량 (Weight)</Text>
               <Text style={styles.tableValue}>{Number(fd.weight_kg).toLocaleString()} kg</Text>

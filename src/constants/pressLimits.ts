@@ -24,6 +24,7 @@ export const FORGING_SHAPES = [
   { value: "RING",     label: "Ring (링)" },
   { value: "SHELL",    label: "Shell (쉘)" },
   { value: "CYLINDER", label: "Cylinder (실린더)" },
+  { value: "PIPE",     label: "Pipe (파이프)" },
   { value: "SHAFT",    label: "Shaft (샤프트)" },
 ] as const;
 

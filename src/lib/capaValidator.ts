@@ -15,6 +15,7 @@ export interface ValidationResult {
 
 export interface ForgingInput {
   od_mm: number | null;
+  id_mm?: number | null;
   height_mm: number | null;
   weight_kg: number | null;
   shape: ForgingShape | null;
