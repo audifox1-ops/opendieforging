@@ -58,3 +58,17 @@ export async function inferProcess(
     return { suggestion, source: "mock" };
   }
 }
+/**
+ * 사용자 대화를 통해 시방서 초안을 생성 (Drafting)
+ */
+export async function generateDraftFromChat(prompt: string): Promise<any> {
+  const res = await fetch("/api/ai-draft", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+  });
+
+  if (!res.ok) throw new Error("Draft generation failed");
+  const data = await res.json();
+  return data.draft;
+}

@@ -6,6 +6,7 @@ import { Save, ArrowLeft, Send, CheckCircle, Loader2 } from "lucide-react";
 import DashboardShell from "@/components/layout/DashboardShell";
 import InputSmartForm, { INITIAL_FORM_DATA, type SpecFormData } from "@/components/spec-form/InputSmartForm";
 import AiProcessPanel from "@/components/ai-suggestion/AiProcessPanel";
+import AiDraftAssistant from "@/components/ai-suggestion/AiDraftAssistant";
 import { isCapaPassed, type CapaValidationResult } from "@/lib/capaValidator";
 import { inferProcess, type AiInferenceResult } from "@/lib/aiInference";
 import { MATERIAL_STANDARDS, FORGING_SHAPES, HT_TYPES, HT_COOLING_MEDIA } from "@/constants/pressLimits";
@@ -179,6 +180,20 @@ function NewSpecContent() {
             ⛔ <strong>CAPA 검증 실패</strong> — 아래 치수를 수정하지 않으면 저장할 수 없습니다.
           </div>
         )}
+
+        {/* AI 스마트 어시스턴트 (최상단) */}
+        <AiDraftAssistant
+          onApply={(draft) => {
+            setFormData((prev) => ({
+              ...prev,
+              ...draft,
+              // 문자열로 올 수 있는 숫자 필드 보정 (API 응답에 따라)
+              od_mm: draft.od_mm?.toString() ?? prev.od_mm,
+              id_mm: draft.id_mm?.toString() ?? prev.id_mm,
+              height_mm: draft.height_mm?.toString() ?? prev.height_mm,
+            }));
+          }}
+        />
 
         {/* 스마트 입력 폼 */}
         <InputSmartForm
